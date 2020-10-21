@@ -11,6 +11,7 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by BECHRAOUI, 20/10/2020
@@ -19,8 +20,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
-    private PaymentRepository paymentRepository;
-    private StateMachineFactory<PaymentState, PaymentEvent> stateMachineFactory;
+    private final PaymentRepository paymentRepository;
+    private final StateMachineFactory<PaymentState, PaymentEvent> stateMachineFactory;
     private final PaymentStateChangeInterceptor paymentStateChangeInterceptor;
 
     public static final String PAYMENT_ID_HEADER = "payment_id";
@@ -33,31 +34,34 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentRepository.save(payment);
     }
 
+    @Transactional
     @Override
     public StateMachine<PaymentState, PaymentEvent> preAuth(Long paymenetId) {
         StateMachine<PaymentState, PaymentEvent> sm = build(paymenetId);
 
-        sendEvent(paymenetId, sm, PaymentEvent.PRE_AUTHORIZE);
+        sendEvent(paymenetId, sm, PaymentEvent.PRE_AUTH_APPROVED);
 
-        return null;
+        return sm;
     }
 
+    @Transactional
     @Override
     public StateMachine<PaymentState, PaymentEvent> authorizePayment(Long paymenetId) {
         StateMachine<PaymentState, PaymentEvent> sm = build(paymenetId);
 
         sendEvent(paymenetId, sm, PaymentEvent.AUTH_APPROVED);
 
-        return null;
+        return sm;
     }
 
+    @Transactional
     @Override
     public StateMachine<PaymentState, PaymentEvent> declineAuth(Long paymenetId) {
         StateMachine<PaymentState, PaymentEvent> sm = build(paymenetId);
 
         sendEvent(paymenetId, sm, PaymentEvent.AUTH_DECLINED);
 
-        return null;
+        return sm;
     }
 
     private StateMachine<PaymentState, PaymentEvent> build(Long paymentId) {
