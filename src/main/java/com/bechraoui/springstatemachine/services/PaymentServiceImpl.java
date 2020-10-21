@@ -12,8 +12,6 @@ import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Service;
 
-import javax.swing.plaf.nimbus.State;
-
 /**
  * Created by BECHRAOUI, 20/10/2020
  */
@@ -23,6 +21,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private PaymentRepository paymentRepository;
     private StateMachineFactory<PaymentState, PaymentEvent> stateMachineFactory;
+    private final PaymentStateChangeInterceptor paymentStateChangeInterceptor;
 
     public static final String PAYMENT_ID_HEADER = "payment_id";
 
@@ -69,6 +68,7 @@ public class PaymentServiceImpl implements PaymentService {
         sm.stop();
 
         sm.getStateMachineAccessor().doWithRegion(sma -> {
+            sma.addStateMachineInterceptor(paymentStateChangeInterceptor);
             sma.resetStateMachine(new DefaultStateMachineContext<>(payment.getState(), null,null,null));
         });
 
