@@ -49,7 +49,7 @@ public class PaymentServiceImpl implements PaymentService {
     public StateMachine<PaymentState, PaymentEvent> authorizePayment(Long paymenetId) {
         StateMachine<PaymentState, PaymentEvent> sm = build(paymenetId);
 
-        sendEvent(paymenetId, sm, PaymentEvent.AUTH_APPROVED);
+        sendEvent(paymenetId, sm, PaymentEvent.AUTHORIZE);
 
         return sm;
     }
